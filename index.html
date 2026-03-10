@@ -1,1342 +1,745 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SONAGED S.A — Outil de Veille Stratégique</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SONAGED S.A — Veille Stratégique</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
   <style>
-    :root {
-      --bg: #0a0f0d;
-      --bg2: #111a14;
-      --bg3: #162019;
-      --border: #1f3327;
-      --green: #00e676;
-      --green2: #00c853;
-      --green-dim: rgba(0,230,118,0.12);
-      --green-glow: rgba(0,230,118,0.25);
-      --gold: #ffd740;
-      --text: #e8f5e9;
-      --text2: #81c784;
-      --text3: #4caf50;
-      --red: #ff5252;
-      --blue: #40c4ff;
-      --orange: #ffab40;
+    :root{
+      --bg:#080d0a;--bg2:#0f1a12;--bg3:#152019;--border:#1c3023;
+      --green:#00e676;--green2:#00c853;--gdim:rgba(0,230,118,.1);--gglow:rgba(0,230,118,.2);
+      --gold:#ffd740;--text:#e8f5e9;--text2:#81c784;--text3:#4caf50;
+      --red:#ff5252;--blue:#40c4ff;--orange:#ffab40;--purple:#ce93d8;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    /* GRID BACKGROUND */
-    body::before {
-      content: '';
-      position: fixed; inset: 0;
-      background-image:
-        linear-gradient(rgba(0,230,118,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,230,118,0.03) 1px, transparent 1px);
-      background-size: 40px 40px;
-      pointer-events: none;
-      z-index: 0;
-    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,230,118,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,230,118,.025) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
 
     /* SIDEBAR */
-    .sidebar {
-      position: fixed; left: 0; top: 0; bottom: 0; width: 240px;
-      background: var(--bg2);
-      border-right: 1px solid var(--border);
-      display: flex; flex-direction: column;
-      z-index: 100;
-      padding: 0 0 24px 0;
-    }
-    .logo {
-      padding: 28px 24px 24px;
-      border-bottom: 1px solid var(--border);
-    }
-    .logo-badge {
-      display: inline-block;
-      background: var(--green);
-      color: #000;
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: 11px;
-      letter-spacing: 2px;
-      padding: 4px 8px;
-      border-radius: 3px;
-      margin-bottom: 8px;
-    }
-    .logo h1 {
-      font-family: 'Syne', sans-serif;
-      font-size: 18px;
-      font-weight: 800;
-      color: var(--text);
-      line-height: 1.2;
-    }
-    .logo p {
-      font-size: 11px;
-      color: var(--text2);
-      margin-top: 4px;
-      letter-spacing: 0.5px;
-    }
-
-    .nav { flex: 1; padding: 16px 12px; }
-    .nav-section {
-      font-size: 10px;
-      letter-spacing: 2px;
-      color: var(--text3);
-      font-weight: 600;
-      padding: 12px 12px 6px;
-      text-transform: uppercase;
-    }
-    .nav-item {
-      display: flex; align-items: center; gap: 10px;
-      padding: 10px 12px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 13.5px;
-      color: var(--text2);
-      transition: all 0.2s;
-      margin-bottom: 2px;
-    }
-    .nav-item:hover { background: var(--green-dim); color: var(--text); }
-    .nav-item.active {
-      background: var(--green-dim);
-      color: var(--green);
-      border: 1px solid rgba(0,230,118,0.2);
-    }
-    .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
-    .nav-item .badge {
-      margin-left: auto;
-      background: var(--red);
-      color: #fff;
-      font-size: 10px;
-      font-weight: 700;
-      padding: 1px 6px;
-      border-radius: 10px;
-      min-width: 18px;
-      text-align: center;
-    }
-    .nav-item .badge.green { background: var(--green); color: #000; }
-
-    .sidebar-footer {
-      padding: 16px 24px;
-      border-top: 1px solid var(--border);
-      font-size: 11px;
-      color: var(--text3);
-    }
-    .status-dot {
-      display: inline-block; width: 7px; height: 7px;
-      background: var(--green);
-      border-radius: 50%;
-      margin-right: 6px;
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-      0%,100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
+    .sidebar{position:fixed;left:0;top:0;bottom:0;width:232px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100}
+    .logo{padding:24px 20px 20px;border-bottom:1px solid var(--border)}
+    .logo-badge{display:inline-flex;align-items:center;gap:6px;background:var(--green);color:#000;font-family:'Syne',sans-serif;font-weight:800;font-size:10px;letter-spacing:2px;padding:4px 10px;border-radius:4px;margin-bottom:10px}
+    .logo h1{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;line-height:1.25}
+    .logo p{font-size:11px;color:var(--text2);margin-top:4px}
+    .nav{flex:1;padding:12px 10px;overflow-y:auto}
+    .nav-sec{font-size:9.5px;letter-spacing:2px;color:var(--text3);font-weight:700;padding:12px 10px 5px;text-transform:uppercase}
+    .nav-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--text2);transition:all .15s;margin-bottom:1px;border:1px solid transparent}
+    .nav-item:hover{background:var(--gdim);color:var(--text)}
+    .nav-item.active{background:var(--gdim);color:var(--green);border-color:rgba(0,230,118,.15)}
+    .nav-item .ic{width:18px;text-align:center;font-size:14px}
+    .nav-item .badge{margin-left:auto;font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px;min-width:18px;text-align:center}
+    .badge.red{background:var(--red);color:#fff}
+    .badge.green{background:var(--green);color:#000}
+    .sidebar-footer{padding:14px 20px;border-top:1px solid var(--border)}
+    .pulse{display:inline-block;width:7px;height:7px;background:var(--green);border-radius:50%;margin-right:6px;animation:pulse 2s infinite}
+    @keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 var(--gglow)}50%{opacity:.5;box-shadow:0 0 0 6px transparent}}
 
     /* MAIN */
-    .main {
-      margin-left: 240px;
-      min-height: 100vh;
-      position: relative; z-index: 1;
-    }
-
-    /* TOPBAR */
-    .topbar {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 20px 32px;
-      border-bottom: 1px solid var(--border);
-      background: rgba(10,15,13,0.8);
-      backdrop-filter: blur(10px);
-      position: sticky; top: 0; z-index: 50;
-    }
-    .topbar-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; }
-    .topbar-right { display: flex; align-items: center; gap: 12px; }
-    .search-bar {
-      display: flex; align-items: center;
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px 14px; gap: 8px;
-    }
-    .search-bar input {
-      background: none; border: none; outline: none;
-      color: var(--text); font-size: 13px;
-      font-family: 'DM Sans', sans-serif;
-      width: 220px;
-    }
-    .search-bar input::placeholder { color: var(--text3); }
-    .btn {
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 500;
-      cursor: pointer;
-      border: none;
-      transition: all 0.2s;
-    }
-    .btn-primary {
-      background: var(--green);
-      color: #000;
-    }
-    .btn-primary:hover { background: var(--green2); transform: translateY(-1px); }
-    .btn-ghost {
-      background: var(--bg3);
-      color: var(--text2);
-      border: 1px solid var(--border);
-    }
-    .btn-ghost:hover { border-color: var(--green); color: var(--green); }
+    .main{margin-left:232px;min-height:100vh;position:relative;z-index:1}
+    .topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 28px;border-bottom:1px solid var(--border);background:rgba(8,13,10,.85);backdrop-filter:blur(12px);position:sticky;top:0;z-index:50}
+    .topbar-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700}
+    .topbar-right{display:flex;align-items:center;gap:10px}
+    .search-wrap{display:flex;align-items:center;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 12px;gap:7px;transition:border-color .2s}
+    .search-wrap:focus-within{border-color:var(--green)}
+    .search-wrap input{background:none;border:none;outline:none;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;width:200px}
+    .search-wrap input::placeholder{color:var(--text3)}
+    .btn{padding:7px 14px;border-radius:7px;font-size:12.5px;font-family:'DM Sans',sans-serif;font-weight:500;cursor:pointer;border:none;transition:all .2s}
+    .btn-p{background:var(--green);color:#000}.btn-p:hover{background:var(--green2);transform:translateY(-1px)}
+    .btn-g{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}.btn-g:hover{border-color:var(--green);color:var(--green)}
+    .refresh-btn{display:flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:7px 12px;font-size:12px;color:var(--text2);cursor:pointer;transition:all .2s}
+    .refresh-btn:hover{border-color:var(--green);color:var(--green)}
+    .refresh-btn.spinning .spin-icon{animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .last-update{font-size:11px;color:var(--text3)}
 
     /* CONTENT */
-    .content { padding: 32px; }
+    .content{padding:24px 28px}
+    .page{display:none}.page.active{display:block}
 
-    /* PAGE visibility */
-    .page { display: none; }
-    .page.active { display: block; }
+    /* LOADING OVERLAY */
+    .loading-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:16px}
+    .loader{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite}
+    .loading-state p{color:var(--text3);font-size:13px}
 
-    /* STATS GRID */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      margin-bottom: 28px;
-    }
-    .stat-card {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
-      position: relative;
-      overflow: hidden;
-      transition: border-color 0.2s;
-    }
-    .stat-card:hover { border-color: var(--green); }
-    .stat-card::before {
-      content: '';
-      position: absolute; top: 0; left: 0; right: 0; height: 2px;
-    }
-    .stat-card.c1::before { background: var(--green); }
-    .stat-card.c2::before { background: var(--blue); }
-    .stat-card.c3::before { background: var(--orange); }
-    .stat-card.c4::before { background: var(--red); }
-    .stat-label {
-      font-size: 11px;
-      color: var(--text3);
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-    .stat-value {
-      font-family: 'Syne', sans-serif;
-      font-size: 32px;
-      font-weight: 800;
-      color: var(--text);
-      line-height: 1;
-    }
-    .stat-change {
-      font-size: 12px;
-      margin-top: 8px;
-      display: flex; align-items: center; gap: 4px;
-    }
-    .stat-change.up { color: var(--green); }
-    .stat-change.down { color: var(--red); }
+    /* STATS */
+    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+    .stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:11px;padding:18px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s}
+    .stat-card:hover{border-color:var(--green);transform:translateY(-2px)}
+    .stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+    .stat-card.c1::after{background:var(--green)}.stat-card.c2::after{background:var(--blue)}
+    .stat-card.c3::after{background:var(--orange)}.stat-card.c4::after{background:var(--purple)}
+    .stat-label{font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:7px}
+    .stat-value{font-family:'Syne',sans-serif;font-size:30px;font-weight:800;color:var(--text);line-height:1}
+    .stat-sub{font-size:11.5px;color:var(--text3);margin-top:7px}
+    .stat-sub.up{color:var(--green)}.stat-sub.down{color:var(--red)}
 
-    /* GRID 2 COL */
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      margin-bottom: 20px;
-    }
-    .grid-3-1 {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 20px;
-      margin-bottom: 20px;
-    }
+    /* GRID */
+    .g2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+    .g31{display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-bottom:18px}
 
-    /* CARDS */
-    .card {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-    }
-    .card-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border);
-    }
-    .card-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text);
-    }
-    .card-body { padding: 20px; }
+    /* CARD */
+    .card{background:var(--bg2);border:1px solid var(--border);border-radius:11px;overflow:hidden}
+    .card-h{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border)}
+    .card-title{font-family:'Syne',sans-serif;font-size:13.5px;font-weight:700}
+    .card-b{padding:18px}
+    .chart-wrap{position:relative;height:200px}
+    .see-all{font-size:11.5px;color:var(--green);cursor:pointer;transition:opacity .2s}.see-all:hover{opacity:.7}
 
-    /* FEED ITEMS */
-    .feed-item {
-      display: flex; gap: 14px;
-      padding: 14px 0;
-      border-bottom: 1px solid var(--border);
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-    .feed-item:last-child { border-bottom: none; }
-    .feed-item:hover { background: var(--green-dim); margin: 0 -20px; padding: 14px 20px; border-radius: 8px; }
-    .feed-source {
-      min-width: 56px; height: 56px;
-      border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 22px;
-    }
-    .feed-source.press { background: rgba(64,196,255,0.12); }
-    .feed-source.social { background: rgba(255,171,64,0.12); }
-    .feed-source.legal { background: rgba(255,82,82,0.12); }
-    .feed-source.competitor { background: rgba(0,230,118,0.12); }
-    .feed-content { flex: 1; }
-    .feed-title {
-      font-size: 13.5px;
-      font-weight: 500;
-      color: var(--text);
-      line-height: 1.4;
-      margin-bottom: 5px;
-    }
-    .feed-meta {
-      display: flex; gap: 10px;
-      font-size: 11px; color: var(--text3);
-    }
-    .tag {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-    }
-    .tag.press { background: rgba(64,196,255,0.15); color: var(--blue); }
-    .tag.social { background: rgba(255,171,64,0.15); color: var(--orange); }
-    .tag.legal { background: rgba(255,82,82,0.15); color: var(--red); }
-    .tag.competitor { background: rgba(0,230,118,0.15); color: var(--green); }
-    .tag.critical { background: rgba(255,82,82,0.25); color: var(--red); border: 1px solid var(--red); }
-    .feed-sentiment {
-      margin-left: auto;
-      font-size: 18px;
-    }
-
-    /* CHART CONTAINER */
-    .chart-wrap { position: relative; height: 220px; }
+    /* FEED */
+    .feed-item{display:flex;gap:12px;padding:13px 0;border-bottom:1px solid rgba(28,48,35,.6);cursor:pointer;transition:all .15s;animation:fadeIn .4s ease forwards}
+    .feed-item:last-child{border-bottom:none}
+    .feed-item:hover{background:var(--gdim);margin:0 -18px;padding:13px 18px;border-radius:8px}
+    .feed-icon{min-width:48px;height:48px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+    .fi-press{background:rgba(64,196,255,.1)}.fi-social{background:rgba(255,171,64,.1)}
+    .fi-legal{background:rgba(206,147,216,.1)}.fi-competitor{background:rgba(0,230,118,.1)}
+    .feed-content{flex:1;min-width:0}
+    .feed-title{font-size:13px;font-weight:500;color:var(--text);line-height:1.4;margin-bottom:5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .feed-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:11px;color:var(--text3)}
+    .tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:.3px}
+    .tag-press{background:rgba(64,196,255,.12);color:var(--blue)}
+    .tag-social{background:rgba(255,171,64,.12);color:var(--orange)}
+    .tag-legal{background:rgba(206,147,216,.12);color:var(--purple)}
+    .tag-competitor{background:rgba(0,230,118,.12);color:var(--green)}
+    .sentiment{font-size:16px;margin-left:auto;flex-shrink:0}
+    .source-badge{background:var(--bg3);padding:1px 7px;border-radius:10px;font-size:10px;color:var(--text3);border:1px solid var(--border)}
 
     /* ALERT ITEMS */
-    .alert-item {
-      display: flex; align-items: flex-start; gap: 12px;
-      padding: 12px 16px;
-      border-radius: 8px;
-      margin-bottom: 8px;
-      border: 1px solid transparent;
-    }
-    .alert-item.high { background: rgba(255,82,82,0.08); border-color: rgba(255,82,82,0.2); }
-    .alert-item.medium { background: rgba(255,171,64,0.08); border-color: rgba(255,171,64,0.2); }
-    .alert-item.low { background: rgba(0,230,118,0.08); border-color: rgba(0,230,118,0.15); }
-    .alert-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
-    .alert-dot.high { background: var(--red); }
-    .alert-dot.medium { background: var(--orange); }
-    .alert-dot.low { background: var(--green); }
-    .alert-text { font-size: 13px; line-height: 1.4; }
-    .alert-time { font-size: 11px; color: var(--text3); margin-top: 3px; }
-
-    /* KEYWORDS */
-    .keyword-list { display: flex; flex-wrap: wrap; gap: 8px; padding: 16px 20px; }
-    .kw-chip {
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 6px 14px;
-      font-size: 12px;
-      color: var(--text2);
-      display: flex; align-items: center; gap: 6px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .kw-chip:hover { border-color: var(--green); color: var(--green); }
-    .kw-chip .count {
-      background: var(--green-dim);
-      color: var(--green);
-      border-radius: 10px;
-      padding: 1px 6px;
-      font-size: 10px;
-      font-weight: 700;
-    }
-    .kw-chip .remove { opacity: 0.5; font-size: 14px; }
-
-    /* TABLE */
-    table { width: 100%; border-collapse: collapse; }
-    th {
-      text-align: left; padding: 10px 14px;
-      font-size: 11px; color: var(--text3);
-      letter-spacing: 1px; text-transform: uppercase;
-      border-bottom: 1px solid var(--border);
-      font-weight: 600;
-    }
-    td {
-      padding: 12px 14px;
-      font-size: 13px;
-      color: var(--text2);
-      border-bottom: 1px solid rgba(31,51,39,0.5);
-    }
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: var(--green-dim); }
-
-    /* SCORE BAR */
-    .score-bar {
-      height: 4px; border-radius: 2px;
-      background: var(--border);
-      margin-top: 4px;
-    }
-    .score-fill {
-      height: 100%; border-radius: 2px;
-    }
-
-    /* MODAL */
-    .modal-overlay {
-      display: none;
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.7);
-      backdrop-filter: blur(4px);
-      z-index: 200;
-      align-items: center; justify-content: center;
-    }
-    .modal-overlay.open { display: flex; }
-    .modal {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      width: 520px;
-      max-width: 90vw;
-      max-height: 80vh;
-      overflow-y: auto;
-      padding: 28px;
-    }
-    .modal h2 { font-family: 'Syne', sans-serif; font-size: 18px; margin-bottom: 20px; }
-    .form-group { margin-bottom: 16px; }
-    .form-group label { display: block; font-size: 12px; color: var(--text3); margin-bottom: 6px; letter-spacing: 0.5px; }
-    .form-group input, .form-group select, .form-group textarea {
-      width: 100%;
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 14px;
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 13px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-      border-color: var(--green);
-    }
-    .form-group select option { background: var(--bg2); }
-    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
-
-    /* NOTIFICATION */
-    .notif {
-      position: fixed; bottom: 24px; right: 24px;
-      background: var(--bg2);
-      border: 1px solid var(--green);
-      border-radius: 10px;
-      padding: 14px 20px;
-      font-size: 13px;
-      color: var(--text);
-      z-index: 300;
-      transform: translateY(80px); opacity: 0;
-      transition: all 0.3s;
-      max-width: 320px;
-    }
-    .notif.show { transform: translateY(0); opacity: 1; }
-    .notif span { color: var(--green); font-weight: 600; }
-
-    /* EXPORT BUTTONS */
-    .export-row { display: flex; gap: 10px; margin-bottom: 20px; }
-
-    /* SCROLLBAR */
-    ::-webkit-scrollbar { width: 5px; }
-    ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-
-    /* RESPONSIVE */
-    @media (max-width: 1100px) {
-      .stats-grid { grid-template-columns: repeat(2,1fr); }
-      .grid-2, .grid-3-1 { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 768px) {
-      .sidebar { transform: translateX(-100%); }
-      .main { margin-left: 0; }
-    }
-
-    /* ANIMATIONS */
-    .fade-in {
-      animation: fadeIn 0.4s ease forwards;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(12px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* VEILLE METER */
-    .meter-ring {
-      width: 80px; height: 80px;
-      border-radius: 50%;
-      background: conic-gradient(var(--green) 0% 72%, var(--border) 72% 100%);
-      display: flex; align-items: center; justify-content: center;
-      position: relative;
-    }
-    .meter-ring::before {
-      content: '';
-      position: absolute;
-      width: 60px; height: 60px;
-      background: var(--bg2);
-      border-radius: 50%;
-    }
-    .meter-ring span {
-      position: relative; z-index: 1;
-      font-family: 'Syne', sans-serif;
-      font-size: 16px; font-weight: 800;
-      color: var(--green);
-    }
+    .alert-item{display:flex;gap:10px;padding:11px 14px;border-radius:8px;margin-bottom:7px;border:1px solid transparent}
+    .alert-item.high{background:rgba(255,82,82,.07);border-color:rgba(255,82,82,.18)}
+    .alert-item.medium{background:rgba(255,171,64,.07);border-color:rgba(255,171,64,.18)}
+    .alert-item.low{background:rgba(0,230,118,.07);border-color:rgba(0,230,118,.12)}
+    .a-dot{width:7px;height:7px;border-radius:50%;margin-top:4px;flex-shrink:0}
+    .a-dot.high{background:var(--red)}.a-dot.medium{background:var(--orange)}.a-dot.low{background:var(--green)}
+    .a-text{font-size:12.5px;line-height:1.4;color:var(--text)}
+    .a-time{font-size:10.5px;color:var(--text3);margin-top:2px}
 
     /* PILL TABS */
-    .pill-tabs { display: flex; gap: 6px; padding: 4px; background: var(--bg3); border-radius: 10px; margin-bottom: 20px; width: fit-content; }
-    .pill-tab {
-      padding: 7px 16px; border-radius: 7px; cursor: pointer;
-      font-size: 13px; color: var(--text3); transition: all 0.2s;
-    }
-    .pill-tab.active { background: var(--green); color: #000; font-weight: 600; }
+    .tabs{display:flex;gap:5px;padding:4px;background:var(--bg3);border-radius:9px;margin-bottom:18px;width:fit-content}
+    .tab{padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12.5px;color:var(--text3);transition:all .2s}
+    .tab.active{background:var(--green);color:#000;font-weight:600}
+
+    /* TABLE */
+    table{width:100%;border-collapse:collapse}
+    th{text-align:left;padding:9px 12px;font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border);font-weight:600}
+    td{padding:11px 12px;font-size:12.5px;color:var(--text2);border-bottom:1px solid rgba(28,48,35,.4)}
+    tr:last-child td{border-bottom:none}
+    tr:hover td{background:rgba(0,230,118,.03)}
+
+    /* SCORE BAR */
+    .sbar{height:3px;border-radius:2px;background:var(--border);margin-top:3px}
+    .sbar-fill{height:100%;border-radius:2px}
+
+    /* MODAL */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(5px);z-index:200;align-items:center;justify-content:center}
+    .modal-overlay.open{display:flex}
+    .modal{background:var(--bg2);border:1px solid var(--border);border-radius:14px;width:480px;max-width:90vw;max-height:85vh;overflow-y:auto;padding:26px}
+    .modal h2{font-family:'Syne',sans-serif;font-size:17px;margin-bottom:18px}
+    .fg{margin-bottom:14px}
+    .fg label{display:block;font-size:11px;color:var(--text3);margin-bottom:5px;letter-spacing:.5px;text-transform:uppercase}
+    .fg input,.fg select,.fg textarea{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12.5px;outline:none;transition:border-color .2s}
+    .fg input:focus,.fg select:focus{border-color:var(--green)}
+    .fg select option{background:var(--bg2)}
+    .modal-acts{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+
+    /* NOTIFICATION */
+    .notif{position:fixed;bottom:22px;right:22px;background:var(--bg2);border:1px solid var(--green);border-radius:10px;padding:13px 18px;font-size:12.5px;z-index:300;transform:translateY(70px);opacity:0;transition:all .3s;max-width:300px;box-shadow:0 8px 32px rgba(0,230,118,.1)}
+    .notif.show{transform:translateY(0);opacity:1}
+    .notif b{color:var(--green)}
+
+    /* EMPTY STATE */
+    .empty{text-align:center;padding:40px;color:var(--text3);font-size:13px}
+    .empty .ico{font-size:32px;margin-bottom:12px}
+
+    /* LIVE INDICATOR */
+    .live-pill{display:inline-flex;align-items:center;gap:5px;background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.2);border-radius:20px;padding:3px 10px;font-size:11px;color:var(--green);font-weight:600}
+
+    /* SOURCE PILL */
+    .src-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+    .src-pill{display:flex;align-items:center;gap:5px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:11.5px;color:var(--text2)}
+    .src-pill .n{font-family:'Syne',sans-serif;font-weight:700;color:var(--green)}
+
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .fade-in{animation:fadeIn .4s ease forwards}
+
+    @media(max-width:1100px){.stats-grid{grid-template-columns:repeat(2,1fr)}.g2,.g31{grid-template-columns:1fr}}
+    @media(max-width:768px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}}
+    ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
   </style>
 </head>
 <body>
 
-<!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="logo">
-    <div class="logo-badge">SONAGED</div>
+    <div class="logo-badge">🟢 SONAGED</div>
     <h1>Veille<br>Stratégique</h1>
-    <p>Tableau de bord intelligent</p>
+    <p>Intelligence en temps réel</p>
   </div>
   <nav class="nav">
-    <div class="nav-section">Navigation</div>
-    <div class="nav-item active" onclick="showPage('dashboard')">
-      <span class="icon">◈</span> Dashboard
-    </div>
-    <div class="nav-item" onclick="showPage('flux')">
-      <span class="icon">⌬</span> Flux en temps réel
-      <span class="badge">12</span>
-    </div>
-    <div class="nav-item" onclick="showPage('alertes')">
-      <span class="icon">◎</span> Alertes
-      <span class="badge">3</span>
-    </div>
+    <div class="nav-sec">Principal</div>
+    <div class="nav-item active" onclick="showPage('dashboard',this)"><span class="ic">◈</span>Dashboard</div>
+    <div class="nav-item" onclick="showPage('flux',this)"><span class="ic">⌬</span>Flux live<span class="badge red" id="nav-count">—</span></div>
+    <div class="nav-item" onclick="showPage('alertes',this)"><span class="ic">◎</span>Alertes<span class="badge red" id="nav-alerts">3</span></div>
 
-    <div class="nav-section" style="margin-top:8px">Veille</div>
-    <div class="nav-item" onclick="showPage('presse')">
-      <span class="icon">▦</span> Presse & Médias
-    </div>
-    <div class="nav-item" onclick="showPage('social')">
-      <span class="icon">◉</span> Réseaux Sociaux
-    </div>
-    <div class="nav-item" onclick="showPage('concurrence')">
-      <span class="icon">◈</span> Concurrence
-    </div>
-    <div class="nav-item" onclick="showPage('reglementaire')">
-      <span class="icon">⊞</span> Réglementaire
-    </div>
+    <div class="nav-sec">Sources</div>
+    <div class="nav-item" onclick="showPage('presse',this)"><span class="ic">▦</span>Presse & Médias</div>
+    <div class="nav-item" onclick="showPage('social',this)"><span class="ic">◉</span>Reddit & Forums</div>
+    <div class="nav-item" onclick="showPage('concurrence',this)"><span class="ic">◈</span>Concurrence</div>
+    <div class="nav-item" onclick="showPage('reglementaire',this)"><span class="ic">⊞</span>Réglementaire</div>
 
-    <div class="nav-section" style="margin-top:8px">Outils</div>
-    <div class="nav-item" onclick="showPage('keywords')">
-      <span class="icon">◇</span> Mots-clés
-      <span class="badge green">47</span>
-    </div>
-    <div class="nav-item" onclick="showPage('rapports')">
-      <span class="icon">▤</span> Rapports
-    </div>
-    <div class="nav-item" onclick="openModal('alert-modal')">
-      <span class="icon">⊕</span> Nouvelle alerte
-    </div>
+    <div class="nav-sec">Outils</div>
+    <div class="nav-item" onclick="showPage('rapports',this)"><span class="ic">▤</span>Rapports</div>
+    <div class="nav-item" onclick="openModal('alert-modal')"><span class="ic">⊕</span>Nouvelle alerte</div>
   </nav>
   <div class="sidebar-footer">
-    <div><span class="status-dot"></span>Synchronisation active</div>
-    <div style="margin-top:6px; color: var(--text3)">Dernière MàJ : il y a 2 min</div>
+    <div style="font-size:11px"><span class="pulse"></span>Données en direct</div>
+    <div class="last-update" id="last-update-sidebar" style="margin-top:5px">Chargement...</div>
   </div>
 </aside>
 
-<!-- MAIN -->
 <main class="main">
-
-  <!-- TOPBAR -->
   <div class="topbar">
     <div class="topbar-title" id="page-title">Dashboard</div>
     <div class="topbar-right">
-      <div class="search-bar">
-        <span style="color:var(--text3)">⌕</span>
-        <input type="text" placeholder="Rechercher dans la veille..." id="global-search" oninput="handleSearch(this.value)" />
+      <div class="search-wrap">
+        <span style="color:var(--text3);font-size:14px">⌕</span>
+        <input type="text" placeholder="Filtrer les résultats..." id="search-input" oninput="filterResults(this.value)"/>
       </div>
-      <button class="btn btn-ghost" onclick="exportData('pdf')">⬇ PDF</button>
-      <button class="btn btn-ghost" onclick="exportData('excel')">⬇ Excel</button>
-      <button class="btn btn-primary" onclick="openModal('alert-modal')">+ Alerte</button>
+      <button class="refresh-btn" id="refresh-btn" onclick="fetchData()">
+        <span class="spin-icon">↻</span>
+        <span>Actualiser</span>
+      </button>
+      <button class="btn btn-g" onclick="exportCSV()">⬇ CSV</button>
+      <button class="btn btn-p" onclick="openModal('alert-modal')">+ Alerte</button>
     </div>
   </div>
 
   <div class="content">
 
-    <!-- ═══ PAGE: DASHBOARD ═══ -->
+    <!-- DASHBOARD -->
     <div class="page active fade-in" id="page-dashboard">
-      <div class="stats-grid">
-        <div class="stat-card c1">
-          <div class="stat-label">Articles ce mois</div>
-          <div class="stat-value">284</div>
-          <div class="stat-change up">▲ +18% vs mois dernier</div>
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card c1"><div class="stat-label">Articles trouvés</div><div class="stat-value" id="s-total">—</div><div class="stat-sub" id="s-sources">Chargement...</div></div>
+        <div class="stat-card c2"><div class="stat-label">Ton positif</div><div class="stat-value" id="s-pos">—</div><div class="stat-sub up" id="s-pos-pct"></div></div>
+        <div class="stat-card c3"><div class="stat-label">Alertes actives</div><div class="stat-value">3</div><div class="stat-sub down">1 critique</div></div>
+        <div class="stat-card c4"><div class="stat-label">Score e-réputation</div><div class="stat-value" id="s-score">—</div><div class="stat-sub" id="s-score-sub">/100</div></div>
+      </div>
+
+      <div id="sources-row" style="margin-bottom:18px"></div>
+
+      <div class="g31">
+        <div class="card">
+          <div class="card-h"><div class="card-title">Mentions par sentiment</div><span class="live-pill"><span class="pulse"></span>Live</span></div>
+          <div class="card-b"><div class="chart-wrap"><canvas id="chart-sentiment"></canvas></div></div>
         </div>
-        <div class="stat-card c2">
-          <div class="stat-label">Mentions sociales</div>
-          <div class="stat-value">1 247</div>
-          <div class="stat-change up">▲ +34% cette semaine</div>
-        </div>
-        <div class="stat-card c3">
-          <div class="stat-label">Alertes actives</div>
-          <div class="stat-value">3</div>
-          <div class="stat-change down">▼ 1 critique</div>
-        </div>
-        <div class="stat-card c4">
-          <div class="stat-label">Score e-réputation</div>
-          <div class="stat-value">72<span style="font-size:18px;color:var(--text3)">/100</span></div>
-          <div class="stat-change up">▲ +5 pts ce mois</div>
+        <div class="card">
+          <div class="card-h"><div class="card-title">Sources</div></div>
+          <div class="card-b"><div class="chart-wrap"><canvas id="chart-sources"></canvas></div></div>
         </div>
       </div>
 
-      <div class="grid-3-1">
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">Volume de mentions — 30 derniers jours</div>
-            <div style="font-size:12px;color:var(--text3)">Toutes sources</div>
-          </div>
-          <div class="card-body">
-            <div class="chart-wrap">
-              <canvas id="mainChart"></canvas>
-            </div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">Répartition sources</div>
-          </div>
-          <div class="card-body">
-            <div class="chart-wrap">
-              <canvas id="pieChart"></canvas>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="grid-2">
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">Dernières alertes</div>
-            <span onclick="showPage('alertes')" style="font-size:12px;color:var(--green);cursor:pointer">Tout voir →</span>
-          </div>
-          <div class="card-body" style="padding:12px 16px">
-            <div class="alert-item high">
-              <div class="alert-dot high"></div>
-              <div>
-                <div class="alert-text">Article critique sur la gestion des déchets à Dakar publié par Le Monde Afrique</div>
-                <div class="alert-time">Il y a 47 min • Presse</div>
-              </div>
-            </div>
-            <div class="alert-item medium">
-              <div class="alert-dot medium"></div>
-              <div>
-                <div class="alert-text">Mention Twitter virale — #SONAGED cité 340 fois en 2h</div>
-                <div class="alert-time">Il y a 2h • Réseaux sociaux</div>
-              </div>
-            </div>
-            <div class="alert-item low">
-              <div class="alert-dot low"></div>
-              <div>
-                <div class="alert-text">Nouveau décret ministériel sur la collecte des ordures publié</div>
-                <div class="alert-time">Il y a 5h • Réglementaire</div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">Sentiment global</div>
-          </div>
-          <div class="card-body">
-            <div class="chart-wrap">
-              <canvas id="sentimentChart"></canvas>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
+      <div class="card" style="margin-bottom:18px">
+        <div class="card-h">
           <div class="card-title">Flux récents</div>
-          <span onclick="showPage('flux')" style="font-size:12px;color:var(--green);cursor:pointer">Voir tous →</span>
+          <span class="see-all" onclick="showPage('flux', document.querySelectorAll('.nav-item')[1])">Voir tout →</span>
         </div>
-        <div class="card-body" style="padding:0 20px">
-          <div id="dashboard-feed"></div>
+        <div style="padding:0 18px" id="dash-feed">
+          <div class="loading-state"><div class="loader"></div><p>Collecte des données en cours...</p></div>
         </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><div class="card-title">Alertes récentes</div></div>
+        <div class="card-b" id="dash-alerts" style="padding:12px 14px"></div>
       </div>
     </div>
 
-    <!-- ═══ PAGE: FLUX ═══ -->
+    <!-- FLUX -->
     <div class="page fade-in" id="page-flux">
-      <div class="pill-tabs">
-        <div class="pill-tab active" onclick="filterFeed('all',this)">Tous</div>
-        <div class="pill-tab" onclick="filterFeed('press',this)">Presse</div>
-        <div class="pill-tab" onclick="filterFeed('social',this)">Social</div>
-        <div class="pill-tab" onclick="filterFeed('legal',this)">Réglementaire</div>
-        <div class="pill-tab" onclick="filterFeed('competitor',this)">Concurrence</div>
+      <div class="tabs" id="flux-tabs">
+        <div class="tab active" onclick="filterType('all',this)">Tous</div>
+        <div class="tab" onclick="filterType('press',this)">Presse</div>
+        <div class="tab" onclick="filterType('social',this)">Forums</div>
+        <div class="tab" onclick="filterType('legal',this)">Réglementaire</div>
+        <div class="tab" onclick="filterType('competitor',this)">Concurrence</div>
       </div>
       <div class="card">
-        <div class="card-header">
-          <div class="card-title">Flux temps réel</div>
-          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--green)">
-            <span class="status-dot"></span>En direct
-          </div>
+        <div class="card-h">
+          <div class="card-title">Flux temps réel — toutes sources</div>
+          <span class="live-pill"><span class="pulse"></span>Auto-refresh 15 min</span>
         </div>
-        <div class="card-body" style="padding:0 20px">
-          <div id="full-feed"></div>
+        <div style="padding:0 18px" id="flux-feed">
+          <div class="loading-state"><div class="loader"></div><p>Collecte en cours...</p></div>
         </div>
       </div>
     </div>
 
-    <!-- ═══ PAGE: ALERTES ═══ -->
+    <!-- ALERTES -->
     <div class="page fade-in" id="page-alertes">
-      <div class="export-row">
-        <button class="btn btn-ghost" onclick="exportData('pdf')">⬇ Exporter PDF</button>
-        <button class="btn btn-ghost" onclick="exportData('excel')">⬇ Exporter Excel</button>
-        <button class="btn btn-primary" onclick="openModal('alert-modal')">+ Configurer alerte</button>
+      <div style="display:flex;gap:10px;margin-bottom:18px">
+        <button class="btn btn-p" onclick="openModal('alert-modal')">+ Configurer alerte</button>
+        <button class="btn btn-g" onclick="exportCSV()">⬇ Export CSV</button>
       </div>
-      <div class="card" style="margin-bottom:20px">
-        <div class="card-header"><div class="card-title">Alertes critiques</div></div>
-        <div class="card-body" style="padding:12px 16px" id="alerts-list">
-          <!-- filled by JS -->
-        </div>
+      <div class="card" style="margin-bottom:18px">
+        <div class="card-h"><div class="card-title">Alertes détectées automatiquement</div></div>
+        <div class="card-b" style="padding:12px 14px" id="alerts-full"></div>
       </div>
       <div class="card">
-        <div class="card-header"><div class="card-title">Règles d'alerte configurées</div></div>
-        <div class="card-body" style="padding:0">
-          <table>
-            <thead>
-              <tr><th>Nom</th><th>Mots-clés</th><th>Type</th><th>Fréquence</th><th>Statut</th></tr>
-            </thead>
-            <tbody id="rules-table">
-              <tr>
-                <td style="color:var(--text)">Veille SONAGED</td>
-                <td>SONAGED, déchets, Dakar</td>
-                <td><span class="tag press">Presse</span></td>
-                <td>Temps réel</td>
-                <td><span class="tag competitor">Actif</span></td>
-              </tr>
-              <tr>
-                <td style="color:var(--text)">E-réputation</td>
-                <td>SONAGED, avis, scandale</td>
-                <td><span class="tag social">Social</span></td>
-                <td>Quotidienne</td>
-                <td><span class="tag competitor">Actif</span></td>
-              </tr>
-              <tr>
-                <td style="color:var(--text)">Réglementation</td>
-                <td>loi déchets, décret, ONAS</td>
-                <td><span class="tag legal">Légal</span></td>
-                <td>Hebdomadaire</td>
-                <td><span class="tag competitor">Actif</span></td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="card-h"><div class="card-title">Règles d'alerte</div></div>
+        <div class="card-b" style="padding:0">
+          <table><thead><tr><th>Nom</th><th>Mots-clés</th><th>Fréquence</th><th>Statut</th></tr></thead>
+          <tbody id="rules-tbody">
+            <tr><td style="color:var(--text)">Veille principale</td><td>SONAGED, déchets Dakar</td><td>Temps réel</td><td><span class="tag tag-competitor">Actif</span></td></tr>
+            <tr><td style="color:var(--text)">E-réputation</td><td>SONAGED avis, scandale</td><td>15 min</td><td><span class="tag tag-competitor">Actif</span></td></tr>
+            <tr><td style="color:var(--text)">Réglementation</td><td>loi déchets, décret MEDD</td><td>Quotidienne</td><td><span class="tag tag-competitor">Actif</span></td></tr>
+          </tbody></table>
         </div>
       </div>
     </div>
 
-    <!-- ═══ PAGE: PRESSE ═══ -->
+    <!-- PRESSE -->
     <div class="page fade-in" id="page-presse">
-      <div class="stats-grid">
-        <div class="stat-card c1"><div class="stat-label">Articles ce mois</div><div class="stat-value">142</div><div class="stat-change up">▲ +12%</div></div>
-        <div class="stat-card c2"><div class="stat-label">Sources actives</div><div class="stat-value">38</div><div class="stat-change up">▲ +3 nouvelles</div></div>
-        <div class="stat-card c3"><div class="stat-label">Ton positif</div><div class="stat-value">58%</div><div class="stat-change up">▲ +8%</div></div>
-        <div class="stat-card c4"><div class="stat-label">Ton négatif</div><div class="stat-value">22%</div><div class="stat-change down">▼ -4%</div></div>
-      </div>
       <div class="card">
-        <div class="card-header"><div class="card-title">Articles presse récents</div></div>
-        <div class="card-body" style="padding:0 20px" id="press-feed"></div>
+        <div class="card-h"><div class="card-title">Articles presse & médias</div><span class="live-pill"><span class="pulse"></span>Live</span></div>
+        <div style="padding:0 18px" id="press-feed">
+          <div class="loading-state"><div class="loader"></div><p>Chargement...</p></div>
+        </div>
       </div>
     </div>
 
-    <!-- ═══ PAGE: SOCIAL ═══ -->
+    <!-- SOCIAL / REDDIT -->
     <div class="page fade-in" id="page-social">
-      <div class="stats-grid">
-        <div class="stat-card c1"><div class="stat-label">Mentions Twitter/X</div><div class="stat-value">724</div><div class="stat-change up">▲ +41%</div></div>
-        <div class="stat-card c2"><div class="stat-label">Mentions Facebook</div><div class="stat-value">312</div><div class="stat-change up">▲ +15%</div></div>
-        <div class="stat-card c3"><div class="stat-label">Portée estimée</div><div class="stat-value">2.1M</div><div class="stat-change up">▲ +28%</div></div>
-        <div class="stat-card c4"><div class="stat-label">Influenceurs</div><div class="stat-value">14</div><div class="stat-change down">▼ 2 négatifs</div></div>
-      </div>
-      <div class="grid-2">
-        <div class="card">
-          <div class="card-header"><div class="card-title">Volume mentions / semaine</div></div>
-          <div class="card-body"><div class="chart-wrap"><canvas id="socialChart"></canvas></div></div>
-        </div>
-        <div class="card">
-          <div class="card-header"><div class="card-title">Top hashtags</div></div>
-          <div class="card-body">
-            <table>
-              <thead><tr><th>Hashtag</th><th>Volume</th><th>Tendance</th></tr></thead>
-              <tbody>
-                <tr><td>#SONAGED</td><td>487</td><td style="color:var(--green)">▲ Viral</td></tr>
-                <tr><td>#GestionDéchets</td><td>234</td><td style="color:var(--green)">▲ +24%</td></tr>
-                <tr><td>#Dakar</td><td>189</td><td style="color:var(--text3)">→ Stable</td></tr>
-                <tr><td>#Propreté</td><td>145</td><td style="color:var(--green)">▲ +12%</td></tr>
-                <tr><td>#SénégalPropre</td><td>98</td><td style="color:var(--orange)">▼ -8%</td></tr>
-              </tbody>
-            </table>
-          </div>
+      <div class="card">
+        <div class="card-h"><div class="card-title">Reddit & Forums publics</div><span class="live-pill"><span class="pulse"></span>Live</span></div>
+        <div style="padding:0 18px" id="social-feed">
+          <div class="loading-state"><div class="loader"></div><p>Chargement...</p></div>
         </div>
       </div>
     </div>
 
-    <!-- ═══ PAGE: CONCURRENCE ═══ -->
+    <!-- CONCURRENCE -->
     <div class="page fade-in" id="page-concurrence">
-      <div class="card" style="margin-bottom:20px">
-        <div class="card-header"><div class="card-title">Analyse concurrentielle</div></div>
-        <div class="card-body" style="padding:0">
-          <table>
-            <thead>
-              <tr><th>Acteur</th><th>Mentions</th><th>Score visibilité</th><th>Sentiment</th><th>Tendance</th></tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td style="color:var(--green);font-weight:600">SONAGED S.A ★</td>
-                <td>1 247</td>
-                <td>
-                  <div>72/100</div>
-                  <div class="score-bar"><div class="score-fill" style="width:72%;background:var(--green)"></div></div>
-                </td>
-                <td>😊 Positif</td>
-                <td style="color:var(--green)">▲ +5</td>
-              </tr>
-              <tr>
-                <td>ONAS</td>
-                <td>892</td>
-                <td>
-                  <div>65/100</div>
-                  <div class="score-bar"><div class="score-fill" style="width:65%;background:var(--blue)"></div></div>
-                </td>
-                <td>😐 Neutre</td>
-                <td style="color:var(--text3)">→ 0</td>
-              </tr>
-              <tr>
-                <td>Veolia Sénégal</td>
-                <td>445</td>
-                <td>
-                  <div>54/100</div>
-                  <div class="score-bar"><div class="score-fill" style="width:54%;background:var(--orange)"></div></div>
-                </td>
-                <td>😊 Positif</td>
-                <td style="color:var(--orange)">▼ -2</td>
-              </tr>
-              <tr>
-                <td>Suez Environnement</td>
-                <td>210</td>
-                <td>
-                  <div>41/100</div>
-                  <div class="score-bar"><div class="score-fill" style="width:41%;background:var(--red)"></div></div>
-                </td>
-                <td>😔 Négatif</td>
-                <td style="color:var(--red)">▼ -8</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div class="grid-2">
-        <div class="card">
-          <div class="card-header"><div class="card-title">Parts de voix</div></div>
-          <div class="card-body"><div class="chart-wrap"><canvas id="competitorChart"></canvas></div></div>
-        </div>
-        <div class="card">
-          <div class="card-header"><div class="card-title">Dernières actions concurrents</div></div>
-          <div class="card-body" style="padding:0 20px" id="competitor-feed"></div>
+      <div class="card">
+        <div class="card-h"><div class="card-title">Mentions concurrents</div></div>
+        <div style="padding:0 18px" id="competitor-feed">
+          <div class="loading-state"><div class="loader"></div><p>Chargement...</p></div>
         </div>
       </div>
     </div>
 
-    <!-- ═══ PAGE: RÉGLEMENTAIRE ═══ -->
+    <!-- RÉGLEMENTAIRE -->
     <div class="page fade-in" id="page-reglementaire">
       <div class="card">
-        <div class="card-header"><div class="card-title">Veille juridique & réglementaire</div></div>
-        <div class="card-body" style="padding:0">
-          <table>
-            <thead><tr><th>Référence</th><th>Sujet</th><th>Date</th><th>Impact</th><th>Statut</th></tr></thead>
-            <tbody>
-              <tr>
-                <td style="color:var(--text);font-weight:500">Décret 2024-1823</td>
-                <td>Nouvelle norme de collecte déchets urbains</td>
-                <td>15 Nov 2024</td>
-                <td><span class="tag critical">Critique</span></td>
-                <td><span class="tag social">À analyser</span></td>
-              </tr>
-              <tr>
-                <td style="color:var(--text);font-weight:500">Loi 2024-08</td>
-                <td>Mise à jour code environnement Sénégal</td>
-                <td>3 Oct 2024</td>
-                <td><span class="tag press">Modéré</span></td>
-                <td><span class="tag competitor">Traité</span></td>
-              </tr>
-              <tr>
-                <td style="color:var(--text);font-weight:500">Circulaire MEDD-24</td>
-                <td>Obligations reporting environnemental 2025</td>
-                <td>22 Sep 2024</td>
-                <td><span class="tag social">Important</span></td>
-                <td><span class="tag competitor">En cours</span></td>
-              </tr>
-              <tr>
-                <td style="color:var(--text);font-weight:500">Directive UA-ENV-7</td>
-                <td>Standards Union Africaine gestion déchets</td>
-                <td>10 Sep 2024</td>
-                <td><span class="tag press">Modéré</span></td>
-                <td><span class="tag competitor">Traité</span></td>
-              </tr>
-              <tr>
-                <td style="color:var(--text);font-weight:500">Note DEEC 2024-44</td>
-                <td>Inspections périodiques sites de traitement</td>
-                <td>1 Sep 2024</td>
-                <td><span class="tag legal">Faible</span></td>
-                <td><span class="tag competitor">Traité</span></td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="card-h"><div class="card-title">Veille réglementaire & juridique</div></div>
+        <div style="padding:0 18px" id="legal-feed">
+          <div class="loading-state"><div class="loader"></div><p>Chargement...</p></div>
         </div>
       </div>
     </div>
 
-    <!-- ═══ PAGE: MOTS-CLÉS ═══ -->
-    <div class="page fade-in" id="page-keywords">
-      <div class="card" style="margin-bottom:20px">
-        <div class="card-header">
-          <div class="card-title">Mots-clés surveillés</div>
-          <button class="btn btn-primary" onclick="openModal('kw-modal')">+ Ajouter</button>
+    <!-- RAPPORTS -->
+    <div class="page fade-in" id="page-rapports">
+      <div class="g2">
+        <div class="card">
+          <div class="card-h"><div class="card-title">Exporter les données</div></div>
+          <div class="card-b" style="display:flex;flex-direction:column;gap:10px">
+            <button class="btn btn-p" style="width:100%;padding:12px" onclick="exportCSV()">📊 Export CSV complet</button>
+            <button class="btn btn-g" style="width:100%;padding:12px" onclick="exportJSON()">📄 Export JSON (brut)</button>
+            <button class="btn btn-g" style="width:100%;padding:12px" onclick="printReport()">🖨 Imprimer rapport</button>
+          </div>
         </div>
-        <div class="keyword-list" id="kw-list">
-          <!-- filled by JS -->
+        <div class="card">
+          <div class="card-h"><div class="card-title">Statistiques actuelles</div></div>
+          <div class="card-b" id="stats-report"></div>
         </div>
       </div>
       <div class="card">
-        <div class="card-header"><div class="card-title">Performance des mots-clés (30j)</div></div>
-        <div class="card-body"><div class="chart-wrap"><canvas id="kwChart"></canvas></div></div>
-      </div>
-    </div>
-
-    <!-- ═══ PAGE: RAPPORTS ═══ -->
-    <div class="page fade-in" id="page-rapports">
-      <div class="export-row">
-        <button class="btn btn-primary" onclick="exportData('pdf')">📄 Générer rapport PDF</button>
-        <button class="btn btn-ghost" onclick="exportData('excel')">📊 Export Excel complet</button>
-      </div>
-      <div class="grid-2">
-        <div class="card">
-          <div class="card-header"><div class="card-title">Rapports générés</div></div>
-          <div class="card-body" style="padding:0">
-            <table>
-              <thead><tr><th>Rapport</th><th>Période</th><th>Format</th><th>Action</th></tr></thead>
-              <tbody>
-                <tr>
-                  <td style="color:var(--text)">Veille mensuelle Nov 2024</td>
-                  <td>1–30 Nov</td>
-                  <td>PDF</td>
-                  <td><span style="color:var(--green);cursor:pointer" onclick="exportData('pdf')">⬇ Télécharger</span></td>
-                </tr>
-                <tr>
-                  <td style="color:var(--text)">Rapport social hebdo S47</td>
-                  <td>18–24 Nov</td>
-                  <td>Excel</td>
-                  <td><span style="color:var(--green);cursor:pointer" onclick="exportData('excel')">⬇ Télécharger</span></td>
-                </tr>
-                <tr>
-                  <td style="color:var(--text)">Analyse concurrentielle Q3</td>
-                  <td>Juil–Sep 2024</td>
-                  <td>PDF</td>
-                  <td><span style="color:var(--green);cursor:pointer" onclick="exportData('pdf')">⬇ Télécharger</span></td>
-                </tr>
-              </tbody>
-            </table>
+        <div class="card-h"><div class="card-title">Configuration NewsAPI (optionnel)</div></div>
+        <div class="card-b">
+          <p style="font-size:12.5px;color:var(--text2);margin-bottom:14px">Pour accéder à plus de sources, ajoutez votre clé NewsAPI gratuite obtenue sur <a href="https://newsapi.org" target="_blank" style="color:var(--green)">newsapi.org</a></p>
+          <div class="fg">
+            <label>Clé API NewsAPI</label>
+            <input type="text" id="newsapi-key-input" placeholder="Collez votre clé ici..." />
           </div>
-        </div>
-        <div class="card">
-          <div class="card-header"><div class="card-title">Planification rapports automatiques</div></div>
-          <div class="card-body">
-            <div class="alert-item low" style="margin-bottom:8px">
-              <div class="alert-dot low"></div>
-              <div><div class="alert-text" style="color:var(--text)">Rapport hebdomadaire</div><div class="alert-time">Chaque lundi à 8h00 → email DG + Directeurs</div></div>
-            </div>
-            <div class="alert-item medium" style="margin-bottom:8px">
-              <div class="alert-dot medium"></div>
-              <div><div class="alert-text" style="color:var(--text)">Synthèse mensuelle</div><div class="alert-time">1er du mois → direction générale</div></div>
-            </div>
-            <div class="alert-item low">
-              <div class="alert-dot low"></div>
-              <div><div class="alert-text" style="color:var(--text)">Alerte quotidienne critique</div><div class="alert-time">En cas d'alerte rouge → immédiat</div></div>
-            </div>
-          </div>
+          <button class="btn btn-p" onclick="saveNewsAPIKey()">Enregistrer</button>
         </div>
       </div>
     </div>
 
-  </div><!-- /content -->
+  </div>
 </main>
 
-<!-- MODAL: Nouvelle alerte -->
+<!-- MODAL: Alerte -->
 <div class="modal-overlay" id="alert-modal">
   <div class="modal">
     <h2>⊕ Configurer une alerte</h2>
-    <div class="form-group">
-      <label>NOM DE L'ALERTE</label>
-      <input type="text" placeholder="Ex: Crise médias SONAGED" />
+    <div class="fg"><label>Nom de l'alerte</label><input type="text" placeholder="Ex: Crise médias SONAGED"/></div>
+    <div class="fg"><label>Mots-clés supplémentaires</label><input type="text" placeholder="SONAGED, déchets, crise..."/></div>
+    <div class="fg"><label>Fréquence</label>
+      <select><option>Temps réel (15 min)</option><option>Quotidienne</option><option>Hebdomadaire</option></select>
     </div>
-    <div class="form-group">
-      <label>MOTS-CLÉS (séparés par virgule)</label>
-      <input type="text" placeholder="SONAGED, déchets, Dakar, crise..." />
-    </div>
-    <div class="form-group">
-      <label>TYPE DE SOURCE</label>
-      <select>
-        <option>Toutes les sources</option>
-        <option>Presse & médias</option>
-        <option>Réseaux sociaux</option>
-        <option>Sites institutionnels</option>
-        <option>Journal officiel</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>FRÉQUENCE D'ALERTE</label>
-      <select>
-        <option>Temps réel</option>
-        <option>Quotidienne</option>
-        <option>Hebdomadaire</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>EMAIL DE NOTIFICATION</label>
-      <input type="email" placeholder="direction@sonaged.sn" />
-    </div>
-    <div class="form-group">
-      <label>SEUIL DE CRITICITÉ</label>
-      <select>
-        <option>Toutes mentions</option>
-        <option>Mentions à fort impact</option>
-        <option>Sentiment négatif uniquement</option>
-      </select>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal('alert-modal')">Annuler</button>
-      <button class="btn btn-primary" onclick="saveAlert()">Enregistrer l'alerte</button>
+    <div class="fg"><label>Email de notification</label><input type="email" placeholder="direction@sonaged.sn"/></div>
+    <div class="modal-acts">
+      <button class="btn btn-g" onclick="closeModal('alert-modal')">Annuler</button>
+      <button class="btn btn-p" onclick="saveAlert()">Enregistrer</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL: Nouveau mot-clé -->
-<div class="modal-overlay" id="kw-modal">
-  <div class="modal">
-    <h2>◇ Ajouter un mot-clé</h2>
-    <div class="form-group">
-      <label>MOT-CLÉ OU EXPRESSION</label>
-      <input type="text" id="new-kw" placeholder="Ex: gestion déchets Sénégal" />
-    </div>
-    <div class="form-group">
-      <label>CATÉGORIE</label>
-      <select id="kw-cat">
-        <option value="press">Presse</option>
-        <option value="social">Social</option>
-        <option value="legal">Réglementaire</option>
-        <option value="competitor">Concurrence</option>
-      </select>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal('kw-modal')">Annuler</button>
-      <button class="btn btn-primary" onclick="addKeyword()">Ajouter</button>
-    </div>
-  </div>
-</div>
-
-<!-- NOTIFICATION TOAST -->
 <div class="notif" id="notif"></div>
 
 <script>
-// ─── DATA ───────────────────────────────────────────────
-const feedData = [
-  { type:'press', icon:'📰', title:'SONAGED renforce ses équipements de collecte dans les communes de Dakar', source:'Le Soleil', time:'Il y a 1h', sentiment:'😊', keywords:['SONAGED','collecte'] },
-  { type:'social', icon:'🐦', title:'#SONAGED — Félicitations pour l\'opération propreté à Médina ! 👏', source:'Twitter/X', time:'Il y a 2h', sentiment:'😊', keywords:['SONAGED','propreté'] },
-  { type:'legal', icon:'⚖️', title:'Publication du décret 2024-1823 relatif aux normes de collecte des déchets ménagers', source:'Journal Officiel', time:'Il y a 3h', sentiment:'😐', keywords:['déchets','loi'] },
-  { type:'press', icon:'📰', title:'Gestion des déchets : les défis persistants dans la banlieue dakaroise', source:'RFM Sénégal', time:'Il y a 4h', sentiment:'😔', keywords:['déchets','Dakar'] },
-  { type:'competitor', icon:'🏢', title:'ONAS annonce un contrat de 5 milliards pour la modernisation de ses équipements', source:'Agence de Presse Sénégal', time:'Il y a 5h', sentiment:'😐', keywords:['ONAS','concurrence'] },
-  { type:'social', icon:'📱', title:'Vidéo virale : bonne gestion de la décharge de Mbeubeuss saluée par les habitants', source:'Facebook', time:'Il y a 6h', sentiment:'😊', keywords:['SONAGED','Mbeubeuss'] },
-  { type:'press', icon:'📰', title:'Interview du DG de SONAGED : cap sur le recyclage en 2025', source:'L\'Observateur', time:'Il y a 8h', sentiment:'😊', keywords:['SONAGED','recyclage'] },
-  { type:'legal', icon:'⚖️', title:'Projet de loi sur l\'économie circulaire déposé à l\'Assemblée nationale', source:'Assemblée Nationale', time:'Il y a 10h', sentiment:'😊', keywords:['loi','recyclage'] },
-  { type:'competitor', icon:'🏢', title:'Veolia remporte appel d\'offre pour la collecte dans 3 villes du Sénégal', source:'Ecofin', time:'Il y a 12h', sentiment:'😔', keywords:['Veolia','concurrence'] },
-  { type:'social', icon:'📱', title:'Pétition en ligne : améliorer la collecte des ordures à Grand-Yoff (2 300 signatures)', source:'Change.org', time:'Il y a 14h', sentiment:'😔', keywords:['SONAGED','collecte'] },
-  { type:'press', icon:'📰', title:'Propreté à Dakar : SONAGED déploie 40 nouveaux camions', source:'Dakar Actu', time:'Il y a 16h', sentiment:'😊', keywords:['SONAGED','équipements'] },
-  { type:'legal', icon:'⚖️', title:'Audit environnemental national : résultats attendus en décembre', source:'MEDD', time:'Il y a 18h', sentiment:'😐', keywords:['audit','environnement'] },
-];
+// ═══════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════
+let allArticles = [];
+let currentFilter = 'all';
+let searchQuery = '';
+let charts = {};
+let lastFetch = null;
 
-const keywords = [
-  {kw:'SONAGED', cat:'press', count:487},
-  {kw:'déchets Dakar', cat:'press', count:312},
-  {kw:'gestion déchets', cat:'press', count:198},
-  {kw:'propreté Sénégal', cat:'social', count:245},
-  {kw:'ONAS', cat:'competitor', count:134},
-  {kw:'Veolia Sénégal', cat:'competitor', count:89},
-  {kw:'Suez Sénégal', cat:'competitor', count:45},
-  {kw:'collecte ordures', cat:'social', count:178},
-  {kw:'recyclage', cat:'legal', count:92},
-  {kw:'décret déchets', cat:'legal', count:67},
-  {kw:'Mbeubeuss', cat:'press', count:156},
-  {kw:'économie circulaire', cat:'legal', count:43},
-];
+// ═══════════════════════════════════════════════════
+// FETCH DATA from API
+// ═══════════════════════════════════════════════════
+async function fetchData() {
+  const btn = document.getElementById('refresh-btn');
+  btn.classList.add('spinning');
+  showLoader();
 
-const alerts = [
-  { level:'high', text:'Article critique : "Dysfonctionnements chez SONAGED à Pikine" — Le Monde Afrique', time:'Il y a 47 min • Presse' },
-  { level:'high', text:'Trending négatif : #SonagedFail utilisé 120× en 1h sur Twitter', time:'Il y a 1h30 • Réseaux sociaux' },
-  { level:'medium', text:'Nouveau décret sur la collecte — impact réglementaire à évaluer', time:'Il y a 3h • Réglementaire' },
-  { level:'medium', text:'ONAS annonce une expansion dans 2 zones de compétence SONAGED', time:'Il y a 5h • Concurrence' },
-  { level:'low', text:'Article positif : "SONAGED primée pour l\'initiative zéro plastique"', time:'Il y a 8h • Presse' },
-];
+  try {
+    const res = await fetch('/api/news');
+    if (!res.ok) throw new Error('API error ' + res.status);
+    const data = await res.json();
 
-// ─── RENDER FUNCTIONS ────────────────────────────────────
-function renderFeedItems(items, containerId) {
+    if (data.success && data.articles) {
+      allArticles = data.articles;
+      lastFetch = new Date(data.fetchedAt);
+      updateUI(data);
+      notify(`<b>✓ Mise à jour</b> — ${data.articles.length} résultats collectés`);
+    } else {
+      throw new Error('No data');
+    }
+  } catch (err) {
+    console.error('Fetch error:', err);
+    // Fallback: show message
+    showError();
+    notify(`<b>⚠ Erreur</b> — Vérifiez le déploiement de l'API`);
+  } finally {
+    btn.classList.remove('spinning');
+  }
+}
+
+function showLoader() {
+  ['dash-feed','flux-feed','press-feed','social-feed','competitor-feed','legal-feed'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = `<div class="loading-state"><div class="loader"></div><p>Collecte en cours...</p></div>`;
+  });
+}
+
+function showError() {
+  ['dash-feed','flux-feed','press-feed','social-feed','competitor-feed','legal-feed'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = `<div class="empty"><div class="ico">⚠</div><p>Impossible de charger les données.<br>Vérifiez que l'API est bien déployée sur Vercel.</p></div>`;
+  });
+}
+
+// ═══════════════════════════════════════════════════
+// UPDATE UI
+// ═══════════════════════════════════════════════════
+function updateUI(data) {
+  const { stats, articles } = data;
+
+  // Stats cards
+  document.getElementById('s-total').textContent = stats.total;
+  document.getElementById('s-sources').textContent = `${Object.keys(data.sources).filter(k=>data.sources[k]>0).length} sources actives`;
+  document.getElementById('s-pos').textContent = stats.positive;
+  document.getElementById('s-pos-pct').textContent = stats.total > 0 ? `${Math.round(stats.positive/stats.total*100)}% des mentions` : '';
+  document.getElementById('s-score').textContent = stats.reputationScore;
+  document.getElementById('s-score-sub').textContent = stats.reputationScore >= 60 ? '/ 100 ✓ Bon' : stats.reputationScore >= 40 ? '/ 100 ~ Moyen' : '/ 100 ⚠ Critique';
+
+  // Nav badge
+  document.getElementById('nav-count').textContent = stats.total;
+
+  // Last update
+  const timeStr = lastFetch ? lastFetch.toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'}) : '—';
+  document.getElementById('last-update-sidebar').textContent = `MàJ : ${timeStr}`;
+
+  // Source pills
+  const srcRow = document.getElementById('sources-row');
+  srcRow.innerHTML = `<div class="src-pills">
+    ${data.sources.googleNews > 0 ? `<div class="src-pill">Google News <span class="n">${data.sources.googleNews}</span></div>` : ''}
+    ${data.sources.gdelt > 0 ? `<div class="src-pill">GDELT <span class="n">${data.sources.gdelt}</span></div>` : ''}
+    ${data.sources.reddit > 0 ? `<div class="src-pill">Reddit <span class="n">${data.sources.reddit}</span></div>` : ''}
+    ${data.sources.newsapi > 0 ? `<div class="src-pill">NewsAPI <span class="n">${data.sources.newsapi}</span></div>` : ''}
+  </div>`;
+
+  // Charts
+  updateCharts(stats, data.sources);
+
+  // Feeds
+  renderFeed(articles.slice(0, 8), 'dash-feed');
+  renderFeed(getFiltered(articles), 'flux-feed');
+  renderFeed(articles.filter(a => a.type === 'press'), 'press-feed');
+  renderFeed(articles.filter(a => a.type === 'social'), 'social-feed');
+  renderFeed(articles.filter(a => a.type === 'competitor'), 'competitor-feed');
+  renderFeed(articles.filter(a => a.type === 'legal'), 'legal-feed');
+
+  // Alerts
+  generateAlerts(articles);
+
+  // Stats report
+  renderStatsReport(stats, data.sources);
+}
+
+// ═══════════════════════════════════════════════════
+// RENDER FEED
+// ═══════════════════════════════════════════════════
+const ICONS = { press:'📰', social:'💬', legal:'⚖️', competitor:'🏢' };
+const LABELS = { press:'Presse', social:'Forum', legal:'Réglementaire', competitor:'Concurrence' };
+const SENTI = { positive:'😊', negative:'😔', neutral:'😐' };
+
+function renderFeed(articles, containerId) {
   const el = document.getElementById(containerId);
   if (!el) return;
-  el.innerHTML = items.map(item => `
-    <div class="feed-item">
-      <div class="feed-source ${item.type}">${item.icon}</div>
+
+  const toShow = searchQuery
+    ? articles.filter(a => a.title.toLowerCase().includes(searchQuery) || (a.source||'').toLowerCase().includes(searchQuery))
+    : articles;
+
+  if (!toShow.length) {
+    el.innerHTML = `<div class="empty"><div class="ico">🔍</div><p>Aucun résultat trouvé.</p></div>`;
+    return;
+  }
+
+  el.innerHTML = toShow.map((a, i) => `
+    <div class="feed-item" style="animation-delay:${i*0.04}s" onclick="openArticle('${encodeURIComponent(a.url || '#')}')">
+      <div class="feed-icon fi-${a.type}">${ICONS[a.type] || '📄'}</div>
       <div class="feed-content">
-        <div class="feed-title">${item.title}</div>
+        <div class="feed-title">${escHtml(a.title)}</div>
         <div class="feed-meta">
-          <span class="tag ${item.type}">${item.type === 'press' ? 'Presse' : item.type === 'social' ? 'Social' : item.type === 'legal' ? 'Légal' : 'Concurrence'}</span>
-          <span>${item.source}</span>
-          <span>${item.time}</span>
+          <span class="tag tag-${a.type}">${LABELS[a.type] || a.type}</span>
+          <span class="source-badge">${escHtml(a.origin || a.source || '')}</span>
+          <span>${escHtml(a.source || '')}</span>
+          <span>${formatDate(a.publishedAt)}</span>
         </div>
       </div>
-      <div class="feed-sentiment">${item.sentiment}</div>
+      <div class="sentiment">${SENTI[a.sentiment] || '😐'}</div>
     </div>
   `).join('');
 }
 
-function renderAlerts() {
-  const el = document.getElementById('alerts-list');
-  if (!el) return;
-  el.innerHTML = alerts.map(a => `
+function openArticle(encodedUrl) {
+  const url = decodeURIComponent(encodedUrl);
+  if (url && url !== '#') window.open(url, '_blank');
+}
+
+// ═══════════════════════════════════════════════════
+// ALERTS
+// ═══════════════════════════════════════════════════
+function generateAlerts(articles) {
+  const alerts = [];
+  const neg = articles.filter(a => a.sentiment === 'negative');
+  const recent = articles.filter(a => {
+    const d = new Date(a.publishedAt);
+    return Date.now() - d < 24 * 3600 * 1000;
+  });
+
+  if (neg.length > 0) {
+    alerts.push({ level:'high', text:`${neg.length} article(s) à tonalité négative détecté(s) — surveillance recommandée`, time:`${neg.length} mentions négatives` });
+  }
+  if (recent.length > 0) {
+    alerts.push({ level:'medium', text:`${recent.length} nouvelle(s) mention(s) de SONAGED dans les dernières 24h`, time:'Dernières 24h' });
+  }
+  const legalCount = articles.filter(a => a.type === 'legal').length;
+  if (legalCount > 0) {
+    alerts.push({ level:'low', text:`${legalCount} publication(s) réglementaire(s) détectée(s)`, time:'Réglementation' });
+  }
+
+  const html = alerts.map(a => `
     <div class="alert-item ${a.level}">
-      <div class="alert-dot ${a.level}"></div>
-      <div>
-        <div class="alert-text">${a.text}</div>
-        <div class="alert-time">${a.time}</div>
-      </div>
+      <div class="a-dot ${a.level}"></div>
+      <div><div class="a-text">${a.text}</div><div class="a-time">${a.time}</div></div>
     </div>
-  `).join('');
+  `).join('') || `<div class="empty"><div class="ico">✅</div><p>Aucune alerte critique</p></div>`;
+
+  ['dash-alerts','alerts-full'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = html;
+  });
 }
 
-function renderKeywords() {
-  const el = document.getElementById('kw-list');
-  if (!el) return;
-  el.innerHTML = keywords.map((k,i) => `
-    <div class="kw-chip">
-      <span class="tag ${k.cat}" style="padding:1px 6px">${k.cat === 'press' ? '▦' : k.cat === 'social' ? '◉' : k.cat === 'legal' ? '⊞' : '◈'}</span>
-      ${k.kw}
-      <span class="count">${k.count}</span>
-      <span class="remove" onclick="removeKeyword(${i})">✕</span>
-    </div>
-  `).join('');
-}
+// ═══════════════════════════════════════════════════
+// CHARTS
+// ═══════════════════════════════════════════════════
+const grid = 'rgba(28,48,35,.7)';
+const tc = '#4caf50';
 
-// ─── CHARTS ──────────────────────────────────────────────
-function initCharts() {
-  const gridColor = 'rgba(31,51,39,0.7)';
-  const textColor = '#4caf50';
-
-  // Main line chart
-  const ctx1 = document.getElementById('mainChart');
-  if (ctx1 && !ctx1._chart) {
-    const labels = Array.from({length:30},(_,i)=>{
-      const d = new Date(); d.setDate(d.getDate()-29+i);
-      return d.getDate()+'/'+( d.getMonth()+1);
-    });
-    ctx1._chart = new Chart(ctx1, {
-      type:'line',
-      data:{
-        labels,
-        datasets:[
-          {label:'Presse', data: labels.map(()=>Math.floor(Math.random()*30+10)), borderColor:'#40c4ff', backgroundColor:'rgba(64,196,255,0.05)', tension:0.4, pointRadius:0},
-          {label:'Social', data: labels.map(()=>Math.floor(Math.random()*60+20)), borderColor:'#00e676', backgroundColor:'rgba(0,230,118,0.07)', tension:0.4, pointRadius:0},
-          {label:'Réglementaire', data: labels.map(()=>Math.floor(Math.random()*8+1)), borderColor:'#ff5252', backgroundColor:'rgba(255,82,82,0.05)', tension:0.4, pointRadius:0},
-        ]
-      },
-      options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:textColor,font:{family:'DM Sans',size:11}}}}, scales:{x:{ticks:{color:textColor,font:{size:10}},grid:{color:gridColor}},y:{ticks:{color:textColor,font:{size:10}},grid:{color:gridColor}}}}
-    });
-  }
-
-  // Pie
-  const ctx2 = document.getElementById('pieChart');
-  if (ctx2 && !ctx2._chart) {
-    ctx2._chart = new Chart(ctx2, {
-      type:'doughnut',
-      data:{labels:['Presse','Réseaux sociaux','Réglementaire','Concurrence'],datasets:[{data:[38,45,9,8],backgroundColor:['#40c4ff','#00e676','#ff5252','#ffab40'],borderWidth:0}]},
-      options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'right',labels:{color:textColor,font:{family:'DM Sans',size:11},padding:12}}}}
-    });
-  }
-
-  // Sentiment
-  const ctx3 = document.getElementById('sentimentChart');
-  if (ctx3 && !ctx3._chart) {
-    ctx3._chart = new Chart(ctx3, {
-      type:'bar',
-      data:{labels:['Positif','Neutre','Négatif'],datasets:[{data:[58,20,22],backgroundColor:['#00e676','#40c4ff','#ff5252'],borderRadius:6}]},
-      options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{ticks:{color:textColor},grid:{display:false}},y:{ticks:{color:textColor},grid:{color:gridColor}}}}
-    });
-  }
-
-  // Social
-  const ctx4 = document.getElementById('socialChart');
-  if (ctx4 && !ctx4._chart) {
-    ctx4._chart = new Chart(ctx4, {
-      type:'bar',
-      data:{labels:['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'],datasets:[
-        {label:'Twitter/X',data:[120,89,145,210,178,320,234],backgroundColor:'rgba(0,230,118,0.7)',borderRadius:4},
-        {label:'Facebook',data:[45,67,38,92,71,110,89],backgroundColor:'rgba(64,196,255,0.5)',borderRadius:4},
-      ]},
-      options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:textColor,font:{size:11}}}}, scales:{x:{stacked:true,ticks:{color:textColor},grid:{display:false}},y:{stacked:true,ticks:{color:textColor},grid:{color:gridColor}}}}
-    });
-  }
-
-  // Competitor donut
-  const ctx5 = document.getElementById('competitorChart');
-  if (ctx5 && !ctx5._chart) {
-    ctx5._chart = new Chart(ctx5, {
-      type:'doughnut',
-      data:{labels:['SONAGED','ONAS','Veolia','Suez','Autres'],datasets:[{data:[42,30,15,7,6],backgroundColor:['#00e676','#40c4ff','#ffab40','#ff5252','#546e7a'],borderWidth:0}]},
-      options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'right',labels:{color:textColor,font:{size:11},padding:10}}}}
-    });
-  }
-
-  // Keywords chart
-  const ctx6 = document.getElementById('kwChart');
-  if (ctx6 && !ctx6._chart) {
-    const topKw = keywords.slice(0,8);
-    ctx6._chart = new Chart(ctx6, {
+function updateCharts(stats, sources) {
+  // Sentiment bar
+  if (charts.sentiment) charts.sentiment.destroy();
+  const ctx1 = document.getElementById('chart-sentiment');
+  if (ctx1) {
+    charts.sentiment = new Chart(ctx1, {
       type:'bar',
       data:{
-        labels: topKw.map(k=>k.kw),
-        datasets:[{data:topKw.map(k=>k.count),backgroundColor:topKw.map(k=>k.cat==='press'?'#40c4ff':k.cat==='social'?'#00e676':k.cat==='legal'?'#ff5252':'#ffab40'),borderRadius:4}]
+        labels:['Positif','Neutre','Négatif'],
+        datasets:[{data:[stats.positive,stats.neutral,stats.negative],backgroundColor:['#00e676','#40c4ff','#ff5252'],borderRadius:6,borderSkipped:false}]
       },
-      options:{indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{ticks:{color:textColor},grid:{color:gridColor}},y:{ticks:{color:textColor,font:{size:11}},grid:{display:false}}}}
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc,font:{family:'DM Sans',size:11}},grid:{display:false}},y:{ticks:{color:tc,font:{size:10}},grid:{color:grid}}}}
+    });
+  }
+
+  // Sources donut
+  if (charts.sources) charts.sources.destroy();
+  const ctx2 = document.getElementById('chart-sources');
+  const srcLabels = Object.keys(sources).filter(k => sources[k] > 0);
+  const srcData = srcLabels.map(k => sources[k]);
+  if (ctx2 && srcData.length) {
+    charts.sources = new Chart(ctx2, {
+      type:'doughnut',
+      data:{labels:srcLabels,datasets:[{data:srcData,backgroundColor:['#00e676','#40c4ff','#ffab40','#ce93d8'],borderWidth:0}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:tc,font:{family:'DM Sans',size:11},padding:10}}}}
     });
   }
 }
 
-// ─── NAVIGATION ──────────────────────────────────────────
-const pageTitles = {
-  dashboard:'Dashboard', flux:'Flux en temps réel',
-  alertes:'Alertes & Notifications', presse:'Veille Presse & Médias',
-  social:'Veille Réseaux Sociaux', concurrence:'Analyse Concurrentielle',
-  reglementaire:'Veille Réglementaire', keywords:'Mots-clés',
-  rapports:'Rapports & Export',
+// ═══════════════════════════════════════════════════
+// NAVIGATION & FILTERS
+// ═══════════════════════════════════════════════════
+const PAGE_TITLES = {
+  dashboard:'Dashboard',flux:'Flux en temps réel',alertes:'Alertes',
+  presse:'Presse & Médias',social:'Reddit & Forums',concurrence:'Concurrence',
+  reglementaire:'Réglementaire',rapports:'Rapports & Export'
 };
 
-function showPage(id) {
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  const page = document.getElementById('page-'+id);
-  if (page) { page.classList.add('active'); page.classList.remove('fade-in'); void page.offsetWidth; page.classList.add('fade-in'); }
-  document.getElementById('page-title').textContent = pageTitles[id] || id;
-  document.querySelectorAll('.nav-item').forEach(n => {
-    if (n.textContent.toLowerCase().includes(pageTitles[id]?.split(' ')[0]?.toLowerCase() || id)) n.classList.add('active');
-  });
-  setTimeout(initCharts, 50);
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const page = document.getElementById('page-' + id);
+  if (page) { page.classList.remove('fade-in'); void page.offsetWidth; page.classList.add('active','fade-in'); }
+  document.getElementById('page-title').textContent = PAGE_TITLES[id] || id;
+  if (el) el.classList.add('active');
 }
 
-// ─── FEED FILTER ─────────────────────────────────────────
-let currentFilter = 'all';
-function filterFeed(type, el) {
+function filterType(type, el) {
   currentFilter = type;
-  document.querySelectorAll('.pill-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('#flux-tabs .tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
-  const filtered = type === 'all' ? feedData : feedData.filter(f=>f.type===type);
-  renderFeedItems(filtered, 'full-feed');
+  const filtered = type === 'all' ? allArticles : allArticles.filter(a => a.type === type);
+  renderFeed(filtered, 'flux-feed');
 }
 
-// ─── SEARCH ──────────────────────────────────────────────
-function handleSearch(val) {
-  if (!val) { renderFeedItems(feedData.slice(0,5), 'dashboard-feed'); return; }
-  const res = feedData.filter(f => f.title.toLowerCase().includes(val.toLowerCase()) || f.keywords.some(k=>k.toLowerCase().includes(val.toLowerCase())));
-  renderFeedItems(res, 'dashboard-feed');
+function getFiltered(articles) {
+  return currentFilter === 'all' ? articles : articles.filter(a => a.type === currentFilter);
 }
 
-// ─── MODAL ───────────────────────────────────────────────
+function filterResults(val) {
+  searchQuery = val.toLowerCase().trim();
+  ['dash-feed','flux-feed','press-feed','social-feed','competitor-feed','legal-feed'].forEach(id => {
+    const typeMap = { 'dash-feed':'all','flux-feed':currentFilter,'press-feed':'press','social-feed':'social','competitor-feed':'competitor','legal-feed':'legal' };
+    const type = typeMap[id] || 'all';
+    const base = type === 'all' ? allArticles : allArticles.filter(a => a.type === type);
+    renderFeed(base, id);
+  });
+}
+
+// ═══════════════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════════════
+function exportCSV() {
+  if (!allArticles.length) { notify('<b>⚠</b> Aucune donnée à exporter'); return; }
+  const header = 'Titre,Source,Date,Type,Sentiment,URL\n';
+  const rows = allArticles.map(a =>
+    `"${(a.title||'').replace(/"/g,'""')}","${a.source||''}","${formatDate(a.publishedAt)}","${a.type}","${a.sentiment}","${a.url||''}"`
+  ).join('\n');
+  const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url;
+  a.download = `sonaged-veille-${new Date().toISOString().split('T')[0]}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+  notify('<b>✓ Export CSV</b> téléchargé');
+}
+
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(allArticles, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url;
+  a.download = `sonaged-veille-${new Date().toISOString().split('T')[0]}.json`;
+  a.click(); URL.revokeObjectURL(url);
+  notify('<b>✓ Export JSON</b> téléchargé');
+}
+
+function printReport() { window.print(); }
+
+function renderStatsReport(stats, sources) {
+  const el = document.getElementById('stats-report');
+  if (!el) return;
+  el.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:8px;font-size:12.5px;color:var(--text2)">
+      <div>Total articles : <b style="color:var(--text)">${stats.total}</b></div>
+      <div>Positif : <b style="color:var(--green)">${stats.positive}</b></div>
+      <div>Négatif : <b style="color:var(--red)">${stats.negative}</b></div>
+      <div>Neutre : <b style="color:var(--blue)">${stats.neutral}</b></div>
+      <div>Score e-réputation : <b style="color:var(--text)">${stats.reputationScore}/100</b></div>
+      <div style="margin-top:6px;padding-top:8px;border-top:1px solid var(--border)">
+        ${Object.entries(sources).filter(([,v])=>v>0).map(([k,v])=>`<div>${k} : <b style="color:var(--green)">${v}</b></div>`).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════════
+// MODAL & NOTIFICATIONS
+// ═══════════════════════════════════════════════════
 function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); }));
+document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); }));
 
-// ─── ALERT SAVE ──────────────────────────────────────────
-function saveAlert() {
-  closeModal('alert-modal');
-  showNotif('✓ Alerte configurée avec succès. Un email de confirmation a été envoyé.');
+function saveAlert() { closeModal('alert-modal'); notify('<b>✓ Alerte</b> configurée avec succès'); }
+
+function saveNewsAPIKey() {
+  const key = document.getElementById('newsapi-key-input').value.trim();
+  if (!key) return;
+  localStorage.setItem('sonaged_newsapi_key', key);
+  notify('<b>✓ Clé NewsAPI</b> enregistrée — rechargez pour activer');
 }
 
-// ─── KEYWORDS ────────────────────────────────────────────
-function addKeyword() {
-  const kw = document.getElementById('new-kw').value.trim();
-  const cat = document.getElementById('kw-cat').value;
-  if (!kw) return;
-  keywords.unshift({kw, cat, count: 0});
-  renderKeywords();
-  closeModal('kw-modal');
-  document.getElementById('new-kw').value = '';
-  showNotif(`✓ Mot-clé "${kw}" ajouté à la surveillance.`);
-}
-function removeKeyword(i) {
-  keywords.splice(i,1);
-  renderKeywords();
-}
-
-// ─── EXPORT ──────────────────────────────────────────────
-function exportData(type) {
-  showNotif(type==='pdf' ? '📄 Génération du rapport PDF en cours...' : '📊 Export Excel en préparation...');
-}
-
-// ─── NOTIFICATION ────────────────────────────────────────
-function showNotif(msg) {
+function notify(msg) {
   const n = document.getElementById('notif');
   n.innerHTML = msg;
   n.classList.add('show');
-  setTimeout(()=>n.classList.remove('show'), 3500);
+  setTimeout(() => n.classList.remove('show'), 3500);
 }
 
-// ─── INIT ────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════
+function escHtml(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function formatDate(iso) {
+  if (!iso) return '';
+  try {
+    const d = new Date(iso);
+    const diff = Date.now() - d;
+    if (diff < 3600000) return `Il y a ${Math.round(diff/60000)} min`;
+    if (diff < 86400000) return `Il y a ${Math.round(diff/3600000)}h`;
+    return d.toLocaleDateString('fr-FR', {day:'2-digit',month:'short'});
+  } catch { return iso; }
+}
+
+// ═══════════════════════════════════════════════════
+// AUTO-REFRESH (every 15 min)
+// ═══════════════════════════════════════════════════
+setInterval(fetchData, 15 * 60 * 1000);
+
+// ═══════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', () => {
-  renderFeedItems(feedData.slice(0,5), 'dashboard-feed');
-  renderFeedItems(feedData, 'full-feed');
-  renderFeedItems(feedData.filter(f=>f.type==='press'), 'press-feed');
-  renderFeedItems(feedData.filter(f=>f.type==='competitor'), 'competitor-feed');
-  renderAlerts();
-  renderKeywords();
-  setTimeout(initCharts, 100);
+  fetchData();
 });
 </script>
 </body>

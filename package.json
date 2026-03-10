@@ -1,0 +1,16 @@
+{
+  "name": "sonaged-veille",
+  "version": "2.0.0",
+  "description": "Outil de veille stratégique SONAGED S.A — données temps réel",
+  "engines": {
+    "node": "18.x"
+  },
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "vercel": "^33.0.0"
+  }
+}
