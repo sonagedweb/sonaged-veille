@@ -3,7 +3,7 @@
   "version": "2.0.0",
   "description": "Outil de veille stratégique SONAGED S.A — données temps réel",
   "engines": {
-    "node": "18.x"
+    "node": "24.x"
   },
   "scripts": {
     "dev": "vercel dev",
